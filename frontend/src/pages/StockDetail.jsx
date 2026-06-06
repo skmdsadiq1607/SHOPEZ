@@ -37,7 +37,7 @@ const StockDetail = () => {
     useEffect(() => {
         const fetchStock = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/stocks/${symbol}`);
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/stocks/${symbol}`);
                 setStock(res.data);
             } catch (err) {
                 console.error(err);
@@ -55,7 +55,7 @@ const StockDetail = () => {
         setMessage('');
         try {
             const endpoint = type === 'BUY' ? '/api/trade/buy' : '/api/trade/sell';
-            const res = await axios.post(`http://localhost:5000${endpoint}`, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}${endpoint}`, {
                 symbol,
                 quantity: Number(quantity)
             });

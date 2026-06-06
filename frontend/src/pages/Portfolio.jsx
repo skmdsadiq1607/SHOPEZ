@@ -11,8 +11,8 @@ const Portfolio = () => {
         const fetchPortfolioData = async () => {
             try {
                 const [portRes, transRes] = await Promise.all([
-                    axios.get('http://localhost:5000/api/portfolio'),
-                    axios.get('http://localhost:5000/api/portfolio/transactions')
+                    axios.get(`${import.meta.env.VITE_API_URL}/api/portfolio`),
+                    axios.get(`${import.meta.env.VITE_API_URL}/api/portfolio/transactions`)
                 ]);
                 setPortfolio(portRes.data);
                 setTransactions(transRes.data);
