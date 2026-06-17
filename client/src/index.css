@@ -1,21 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f8f9fa;
-  color: #212529;
+  background-color: #f3f4f6; /* Light gray background */
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,0.05) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,0.05) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,0.05) 0, transparent 50%);
+  color: #1f2937;
 }
 
-/* Typography Improvements */
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', sans-serif;
-  letter-spacing: -0.02em;
+/* Premium Typography */
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: -0.03em;
 }
 
-/* Custom Primary Color (ShopEZ Brand) */
 :root {
-  --shopez-primary: #4f46e5;
-  --shopez-primary-hover: #4338ca;
+  --shopez-primary: #4f46e5;       /* Indigo 600 */
+  --shopez-primary-hover: #4338ca; /* Indigo 700 */
+  --shopez-accent: #8b5cf6;        /* Violet 500 */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.4);
 }
 
 .text-primary {
@@ -27,23 +33,61 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background-color: var(--shopez-primary);
-  border-color: var(--shopez-primary);
+  background: linear-gradient(135deg, var(--shopez-primary), var(--shopez-accent));
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
 }
 
 .btn-primary:hover {
-  background-color: var(--shopez-primary-hover);
-  border-color: var(--shopez-primary-hover);
+  background: linear-gradient(135deg, var(--shopez-primary-hover), #7c3aed);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(79, 70, 229, 0.1);
+  color: white;
+}
+
+/* Glassmorphism Classes */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+.glass-nav {
+  background: rgba(17, 24, 39, 0.85) !important; /* Dark glass */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Interactive Elements */
 .product-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.05);
 }
 
 .product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.product-img-wrapper {
+  overflow: hidden;
+}
+
+.product-card:hover .product-img-wrapper img {
+  transform: scale(1.05);
+}
+
+.product-img-wrapper img {
+  transition: transform 0.5s ease;
 }
 
 .text-truncate-2 {
@@ -54,11 +98,37 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Form Styling */
-.form-control:focus, .form-select:focus {
-  border-color: var(--shopez-primary);
-  box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.25);
+.form-control, .form-select {
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  transition: all 0.3s ease;
 }
 
-.bg-light {
-  background-color: #f3f4f6 !important;
+.form-control:focus, .form-select:focus {
+  border-color: var(--shopez-accent);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+  background-color: white;
+}
+
+.split-bg {
+  min-height: 80vh;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  background: white;
+}
+
+.split-img {
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.split-img::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to top, rgba(17,24,39,0.8), transparent);
 }
