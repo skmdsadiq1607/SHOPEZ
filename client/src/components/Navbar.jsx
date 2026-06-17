@@ -46,7 +46,7 @@ const Navbar = () => {
                                 )}
                                 <div className="dropdown me-4">
                                     <button className="btn btn-link nav-link custom-link d-flex align-items-center dropdown-toggle text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <User size={18} className="me-1" /> {user.name.split(' ')[0]}
+                                        <User size={18} className="me-1" /> {(user.name || user.username || 'User').split(' ')[0]}
                                     </button>
                                     <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                                         <li><Link className="dropdown-item py-2" to="/profile">My Profile</Link></li>
