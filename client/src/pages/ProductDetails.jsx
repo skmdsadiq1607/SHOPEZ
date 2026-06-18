@@ -124,10 +124,10 @@ const ProductDetails = () => {
                         </div>
 
                         <div className="d-flex align-items-baseline gap-3 mb-4">
-                            <span className="fs-2 fw-bold text-dark">${discountedPrice.toFixed(2)}</span>
+                            <span className="fs-2 fw-bold text-dark">₹{Math.round(discountedPrice * 80).toLocaleString('en-IN')}</span>
                             {product.discount > 0 && (
                                 <>
-                                    <span className="text-decoration-line-through text-muted fs-5">${product.price.toFixed(2)}</span>
+                                    <span className="text-decoration-line-through text-muted fs-5">₹{Math.round(product.price * 80).toLocaleString('en-IN')}</span>
                                     <span className="text-danger fw-bold fs-5">({product.discount}% OFF)</span>
                                 </>
                             )}

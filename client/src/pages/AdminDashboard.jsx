@@ -143,7 +143,7 @@ const AdminDashboard = () => {
                     <div className="bg-white p-3 rounded-3 border d-flex align-items-center justify-content-between shadow-sm">
                         <div>
                             <span className="text-muted small fw-semibold">Total Revenue</span>
-                            <h4 className="fw-bold text-dark mb-0 mt-1">${totalSales.toFixed(2)}</h4>
+                            <h4 className="fw-bold text-dark mb-0 mt-1">₹{Math.round(totalSales * 80).toLocaleString('en-IN')}</h4>
                         </div>
                         <div className="bg-primary-subtle text-primary rounded-circle p-2.5">
                             <DollarSign size={22} />
@@ -248,7 +248,7 @@ const AdminDashboard = () => {
                                 </div>
                                 <div className="row">
                                     <div className="col-6">
-                                        <label className="form-label text-muted small fw-semibold">Price ($) *</label>
+                                        <label className="form-label text-muted small fw-semibold">Price (USD) *</label>
                                         <input type="number" step="0.01" className="form-control bg-light form-control-sm" value={price} onChange={(e) => setPrice(e.target.value)} required />
                                     </div>
                                     <div className="col-6">
@@ -293,7 +293,7 @@ const AdminDashboard = () => {
                                                     <span className="badge bg-secondary-subtle text-dark">{prod.category}</span>
                                                 </td>
                                                 <td>
-                                                    <span className="fw-bold text-dark">${prod.price.toFixed(2)}</span>
+                                                    <span className="fw-bold text-dark">₹{Math.round(prod.price * 80).toLocaleString('en-IN')}</span>
                                                     {prod.discount > 0 && <span className="text-danger d-block" style={{ fontSize: '10px' }}>{prod.discount}% Off</span>}
                                                 </td>
                                                 <td className="text-end">
@@ -353,7 +353,7 @@ const AdminDashboard = () => {
                                                 ))}
                                             </td>
                                             <td>
-                                                <span className="fw-bold text-dark">${order.totalAmount.toFixed(2)}</span>
+                                                <span className="fw-bold text-dark">₹{Math.round(order.totalAmount * 80).toLocaleString('en-IN')}</span>
                                             </td>
                                             <td>
                                                 <span className="badge bg-success">{order.orderStatus}</span>

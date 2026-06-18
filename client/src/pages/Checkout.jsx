@@ -220,7 +220,7 @@ const Checkout = () => {
                                                     <span className="text-muted small">Qty: {item.quantity} | Size: {item.size}</span>
                                                 </div>
                                             </div>
-                                            <span className="fw-bold text-dark small">${(discPrice * item.quantity).toFixed(2)}</span>
+                                            <span className="fw-bold text-dark small">₹{Math.round(discPrice * item.quantity * 80).toLocaleString('en-IN')}</span>
                                         </div>
                                     );
                                 })}
@@ -228,11 +228,11 @@ const Checkout = () => {
 
                             <div className="d-flex justify-content-between mb-3 text-muted small">
                                 <span>Cart Subtotal</span>
-                                <span>${subtotal.toFixed(2)}</span>
+                                <span>₹{Math.round(subtotal * 80).toLocaleString('en-IN')}</span>
                             </div>
                             <div className="d-flex justify-content-between mb-3 text-success small">
                                 <span>Cart Discount</span>
-                                <span>-${totalDiscount.toFixed(2)}</span>
+                                <span>-₹{Math.round(totalDiscount * 80).toLocaleString('en-IN')}</span>
                             </div>
                             <div className="d-flex justify-content-between mb-3 text-muted small">
                                 <span>Delivery Fee</span>
@@ -243,7 +243,7 @@ const Checkout = () => {
 
                             <div className="d-flex justify-content-between mb-4">
                                 <span className="fw-bold text-dark">Order Total</span>
-                                <span className="fw-bold text-dark fs-5">${finalTotal.toFixed(2)}</span>
+                                <span className="fw-bold text-dark fs-5">₹{Math.round(finalTotal * 80).toLocaleString('en-IN')}</span>
                             </div>
 
                             <button
@@ -251,7 +251,7 @@ const Checkout = () => {
                                 className="btn btn-primary btn-lg w-100 py-2.5 d-flex align-items-center justify-content-center gap-2 shadow-sm fw-bold"
                                 disabled={submitting}
                             >
-                                {submitting ? 'Processing Payment...' : `Pay & Place Order $${finalTotal.toFixed(2)}`}
+                                {submitting ? 'Processing Payment...' : `Pay & Place Order ₹${Math.round(finalTotal * 80).toLocaleString('en-IN')}`}
                             </button>
                         </div>
                     </div>

@@ -100,9 +100,9 @@ const Cart = () => {
                                             <h6 className="fw-bold mb-1 text-dark text-truncate" style={{ maxWidth: '250px' }}>{item.title}</h6>
                                             <span className="badge bg-secondary-subtle text-muted mb-2 px-2 py-1 rounded small">Size: {item.size}</span>
                                             <div className="d-flex align-items-baseline gap-2 mt-1">
-                                                <span className="fw-bold text-dark">${(discPrice * item.quantity).toFixed(2)}</span>
+                                                <span className="fw-bold text-dark">₹{Math.round(discPrice * item.quantity * 80).toLocaleString('en-IN')}</span>
                                                 {item.discount > 0 && (
-                                                    <span className="text-decoration-line-through text-muted small">${(item.price * item.quantity).toFixed(2)}</span>
+                                                    <span className="text-decoration-line-through text-muted small">₹{Math.round(item.price * item.quantity * 80).toLocaleString('en-IN')}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -138,11 +138,11 @@ const Cart = () => {
                         
                         <div className="d-flex justify-content-between mb-3 text-muted small">
                             <span>Price ({cartItems.length} items)</span>
-                            <span>${subtotal.toFixed(2)}</span>
+                            <span>₹{Math.round(subtotal * 80).toLocaleString('en-IN')}</span>
                         </div>
                         <div className="d-flex justify-content-between mb-3 text-success small">
                             <span>Discount</span>
-                            <span>-${totalDiscount.toFixed(2)}</span>
+                            <span>-₹{Math.round(totalDiscount * 80).toLocaleString('en-IN')}</span>
                         </div>
                         <div className="d-flex justify-content-between mb-3 text-muted small">
                             <span>Delivery Charges</span>
@@ -153,7 +153,7 @@ const Cart = () => {
 
                         <div className="d-flex justify-content-between mb-4">
                             <span className="fw-bold text-dark">Total Amount</span>
-                            <span className="fw-bold text-dark fs-5">${finalTotal.toFixed(2)}</span>
+                            <span className="fw-bold text-dark fs-5 text-primary">₹{Math.round(finalTotal * 80).toLocaleString('en-IN')}</span>
                         </div>
 
                         <button className="btn btn-primary btn-lg w-100 py-2.5 d-flex align-items-center justify-content-center gap-2 shadow-sm fw-bold" onClick={() => navigate('/checkout')}>

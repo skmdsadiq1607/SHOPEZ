@@ -182,12 +182,12 @@ const Home = () => {
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <div className="d-flex align-items-baseline gap-2 mb-3">
-                                                            <span className="store-card-price">${discountedPrice.toFixed(2)}</span>
-                                                            {product.discount > 0 && (
-                                                                <span className="store-card-old-price">${product.price.toFixed(2)}</span>
-                                                            )}
-                                                        </div>
+                                                         <div className="d-flex align-items-baseline gap-2 mb-3">
+                                                             <span className="store-card-price">₹{Math.round(discountedPrice * 80).toLocaleString('en-IN')}</span>
+                                                             {product.discount > 0 && (
+                                                                 <span className="store-card-old-price">₹{Math.round(product.price * 80).toLocaleString('en-IN')}</span>
+                                                             )}
+                                                         </div>
                                                         <button
                                                             className="add-to-cart-btn d-flex justify-content-center align-items-center"
                                                             onClick={(e) => handleAddToCart(product, e)}
