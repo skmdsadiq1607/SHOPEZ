@@ -1,97 +1,88 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingCart, Search, User, LogOut, PackageSearch } from 'lucide-react';
+import { ShoppingCart, User, Search, LogOut, LayoutDashboard, ShoppingBag } from 'lucide-react';
 
 const Navbar = () => {
     const { user, logout, cartCount } = useAuth();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const [searchVal, setSearchVal] = useState(searchParams.get('search') || '');
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchVal.trim()) {
+            navigate(`/?search=${encodeURIComponent(searchVal.trim())}`);
+        } else {
+            navigate('/');
+        }
     };
 
     return (
-        <header>
-            <nav className="navbar mega-nav px-3 py-2">
-                <div className="container d-flex flex-wrap align-items-center justify-content-between">
-                    
-                    {/* Logo */}
-                    <div className="d-flex align-items-center col-12 col-lg-auto mb-2 mb-lg-0 me-lg-4">
-                        <Link className="navbar-brand fw-bold fs-4 text-white d-flex align-items-center m-0" to="/">
-                            <PackageSearch className="me-2 text-warning" size={26} />
-                            Shop<span className="text-warning">EZ</span>
-                        </Link>
-                    </div>
+        <nav className="shopez-navbar navbar navbar-expand-lg navbar-light">
+            <div className="container-fluid">
+                <Link className="navbar-brand navbar-brand-logo" to="/">
+                    <ShoppingBag size={28} className="text-primary" />
+                    <span>ShopEZ</span>
+                </Link>
 
-                    {/* Search Bar */}
-                    <div className="col-12 col-lg flex-grow-1 mx-lg-4 mb-2 mb-lg-0">
-                        <div className="input-group search-bar bg-white mx-auto">
-                            <input type="text" className="form-control border-0 shadow-none" placeholder="Search for products, brands and more" aria-label="Search" />
-                            <button className="btn border-0 text-primary bg-white" type="button">
-                                <Search size={20} />
-                            </button>
-                        </div>
-                    </div>
+                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span className="navbar-toggler-icon"></span>
+                </button>
 
-                    {/* Right Side Icons */}
-                    <div className="col-12 col-lg-auto d-flex align-items-center justify-content-lg-end justify-content-center">
-                        {user ? (
-                            <>
-                                {user.usertype === 'admin' && (
-                                    <Link className="nav-link custom-link me-4 d-flex align-items-center" to="/admin">
-                                        Seller Hub
-                                    </Link>
-                                )}
-                                <div className="dropdown me-4">
-                                    <button className="btn btn-link nav-link custom-link d-flex align-items-center dropdown-toggle text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <User size={18} className="me-1" /> {(user.name || user.username || 'User').split(' ')[0]}
-                                    </button>
-                                    <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                        <li><Link className="dropdown-item py-2" to="/profile">My Profile</Link></li>
-                                        <li><Link className="dropdown-item py-2" to="/profile">Orders</Link></li>
-                                        <li><hr className="dropdown-divider" /></li>
-                                        <li><button className="dropdown-item text-danger py-2 d-flex align-items-center" onClick={handleLogout}><LogOut size={16} className="me-2" /> Logout</button></li>
-                                    </ul>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="me-4 d-flex align-items-center">
-                                <Link className="btn bg-white text-primary fw-bold px-4 py-1 rounded-1 me-3 shadow-sm" style={{ fontSize: '15px' }} to="/login">Login</Link>
-                                <Link className="nav-link custom-link" to="/register">Sign Up</Link>
-                            </div>
-                        )}
-                        
-                        <Link className="nav-link custom-link d-flex align-items-center position-relative" to="/cart">
-                            <ShoppingCart size={22} className="me-1" />
-                            <span>Cart</span>
+                <div className="collapse navbar-collapse" id="navbarContent">
+                    <form className="d-flex mx-auto search-bar-container my-2 my-lg-0 position-relative" onSubmit={handleSearchSubmit}>
+                        <Search className="position-absolute start-0 top-50 translate-middle-y ms-3 text-muted" size={18} />
+                        <input
+                            className="form-control search-input"
+                            type="search"
+                            placeholder="Search for products, brands and more..."
+                            value={searchVal}
+                            onChange={(e) => setSearchVal(e.target.value)}
+                        />
+                    </form>
+
+                    <div className="d-flex align-items-center gap-3">
+                        <Link to="/cart" className="btn btn-light rounded-circle p-2 position-relative shadow-sm">
+                            <ShoppingCart size={20} className="text-dark" />
                             {cartCount > 0 && (
-                                <span className="cart-badge">{cartCount}</span>
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style={{ fontSize: '10px' }}>
+                                    {cartCount}
+                                </span>
                             )}
                         </Link>
-                    </div>
-                </div>
-            </nav>
 
-            {/* Sub-Navigation / Categories */}
-            <div className="sub-nav d-none d-md-block">
-                <div className="container d-flex justify-content-between align-items-center">
-                    <div className="d-flex w-100 justify-content-start overflow-auto">
-                        <span className="sub-nav-link fw-bold text-dark">All Categories</span>
-                        <span className="sub-nav-link">Electronics</span>
-                        <span className="sub-nav-link">Mobiles</span>
-                        <span className="sub-nav-link">Men's Fashion</span>
-                        <span className="sub-nav-link">Women's Fashion</span>
-                        <span className="sub-nav-link">Home & Kitchen</span>
-                        <span className="sub-nav-link">Appliances</span>
-                        <span className="sub-nav-link">Beauty</span>
-                        <span className="sub-nav-link">Sports & More</span>
-                        <span className="sub-nav-link">Grocery</span>
+                        {user ? (
+                            <div className="dropdown">
+                                <button className="btn btn-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown">
+                                    <User size={18} />
+                                    <span className="fw-semibold small">{user.name || user.username}</span>
+                                </button>
+                                <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3">
+                                    {user.usertype === 'admin' && (
+                                        <li>
+                                            <Link className="dropdown-item py-2 d-flex align-items-center gap-2" to="/admin">
+                                                <LayoutDashboard size={16} /> Admin Dashboard
+                                            </Link>
+                                        </li>
+                                    )}
+                                    <li>
+                                        <button className="dropdown-item py-2 text-danger d-flex align-items-center gap-2" onClick={logout}>
+                                            <LogOut size={16} /> Logout
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        ) : (
+                            <div className="d-flex gap-2">
+                                <Link to="/login" className="btn btn-outline-primary rounded-pill px-4 btn-sm fw-semibold">Login</Link>
+                                <Link to="/register" className="btn btn-primary rounded-pill px-4 btn-sm fw-semibold shadow-sm">Sign Up</Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
-        </header>
+        </nav>
     );
 };
 

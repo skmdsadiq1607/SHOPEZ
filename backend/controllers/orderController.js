@@ -2,26 +2,26 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 
 exports.createOrder = async (req, res) => {
+  const { items, totalAmount, shippingAddress, mobile, paymentMethod } = req.body;
   try {
-    const { name, mobile, email, address, pincode, products, totalAmount, paymentMethod } = req.body;
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: 'No items in order' });
+    }
 
-    const newOrder = new Order({
-      userId: req.user.id,
-      name,
-      mobile,
-      email,
-      address,
-      pincode,
-      products,
+    const order = new Order({
+      userId: req.user._id,
+      items,
       totalAmount,
+      shippingAddress,
+      mobile,
       paymentMethod
     });
 
-    const savedOrder = await newOrder.save();
+    const savedOrder = await order.save();
     
-    // Clear user's cart after successful order
-    await Cart.deleteMany({ userId: req.user.id });
-
+    // Clear user's cart after creating the order
+    await Cart.deleteMany({ userId: req.user._id });
+    
     res.status(201).json(savedOrder);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -30,7 +30,7 @@ exports.createOrder = async (req, res) => {
 
 exports.getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.id }).sort({ orderDate: -1 });
+    const orders = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -39,20 +39,9 @@ exports.getUserOrders = async (req, res) => {
 
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().sort({ orderDate: -1 });
+    const orders = await Order.find().populate('userId', 'username email name').sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
-  }
-};
-
-exports.updateOrderStatus = async (req, res) => {
-  try {
-    const { status } = req.body;
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-    res.json(order);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
   }
 };

@@ -4,10 +4,7 @@ const orderController = require('../controllers/orderController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 router.post('/', protect, orderController.createOrder);
-router.get('/myorders', protect, orderController.getUserOrders);
-
-// Admin routes
-router.get('/', protect, admin, orderController.getAllOrders);
-router.put('/:id/status', protect, admin, orderController.updateOrderStatus);
+router.get('/', protect, orderController.getUserOrders);
+router.get('/all', protect, admin, orderController.getAllOrders);
 
 module.exports = router;

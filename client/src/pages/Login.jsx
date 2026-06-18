@@ -1,89 +1,84 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { ShoppingBag } from 'lucide-react';
 
 const Login = () => {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const { login } = useAuth();
-    const navigate = useNavigate();
+    const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
+        if (!email.trim() || !password.trim()) {
+            setError('Please fill in all fields.');
+            return;
+        }
+
+        setSubmitting(true);
+        setError('');
         try {
             await login(email, password);
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'Login failed');
-        } finally {
-            setIsLoading(false);
+            console.error('Login error:', err);
+            setError(err.response?.data?.message || 'Invalid email or password.');
+            setSubmitting(false);
         }
     };
 
     return (
-        <div className="container py-5 my-md-5">
-            <div className="row g-0 split-bg">
-                {/* Image Section */}
-                <div className="col-lg-6 d-none d-lg-block split-img" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80)' }}>
-                    <div className="position-absolute bottom-0 start-0 p-5 z-1 text-white">
-                        <h2 className="display-4 fw-bolder mb-3">Elevate your<br/>shopping experience.</h2>
-                        <p className="lead text-white-50">Discover premium products curated just for you.</p>
-                    </div>
+        <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '75vh' }}>
+            <div className="bg-white p-4 rounded-3 border shadow-sm w-100 animate-fade-in" style={{ maxWidth: '400px' }}>
+                <div className="text-center mb-4">
+                    <ShoppingBag size={48} className="text-primary mb-2" />
+                    <h4 className="fw-bold text-dark font-secondary">Welcome back to ShopEZ</h4>
+                    <p className="text-muted small">Please sign in to continue shopping</p>
                 </div>
-                
-                {/* Form Section */}
-                <div className="col-lg-6 d-flex align-items-center justify-content-center p-4 p-md-5 bg-white">
-                    <div className="w-100" style={{ maxWidth: '400px' }}>
-                        <div className="text-center mb-5">
-                            <h2 className="fw-bolder text-primary mb-2">Welcome Back</h2>
-                            <p className="text-muted">Sign in to continue to ShopEZ</p>
-                        </div>
-                        
-                        {error && <div className="alert alert-danger rounded-3 border-0 bg-danger bg-opacity-10 text-danger mb-4">{error}</div>}
-                        
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-4">
-                                <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider">Email Address</label>
-                                <input 
-                                    type="email" 
-                                    className="form-control" 
-                                    value={email} 
-                                    onChange={(e) => setEmail(e.target.value)} 
-                                    required 
-                                    placeholder="name@example.com"
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <div className="d-flex justify-content-between align-items-center mb-1">
-                                    <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider mb-0">Password</label>
-                                    <a href="#" className="text-primary text-decoration-none small fw-semibold">Forgot password?</a>
-                                </div>
-                                <input 
-                                    type="password" 
-                                    className="form-control" 
-                                    value={password} 
-                                    onChange={(e) => setPassword(e.target.value)} 
-                                    required 
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                            
-                            <button type="submit" className="btn btn-primary w-100 btn-lg fw-bold rounded-pill shadow-sm mb-4" disabled={isLoading}>
-                                {isLoading ? (
-                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                ) : (
-                                    'Sign In'
-                                )}
-                            </button>
-                            
-                            <p className="text-center text-muted">
-                                Don't have an account? <Link to="/register" className="text-primary text-decoration-none fw-bold ms-1">Register here</Link>
-                            </p>
-                        </form>
+
+                {error && <div className="alert alert-danger rounded-2 py-2.5 small">{error}</div>}
+
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <label className="form-label text-muted small fw-semibold">Email Address</label>
+                        <input
+                            type="email"
+                            className="form-control bg-light"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
                     </div>
+
+                    <div className="mb-4">
+                        <label className="form-label text-muted small fw-semibold">Password</label>
+                        <input
+                            type="password"
+                            className="form-control bg-light"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="btn btn-primary w-100 py-2.5 rounded-pill fw-semibold shadow-sm mb-3"
+                        disabled={submitting}
+                    >
+                        {submitting ? 'Signing in...' : 'Sign In'}
+                    </button>
+                </form>
+
+                <div className="text-center">
+                    <span className="text-muted small">Don't have an account? </span>
+                    <Link to="/register" className="text-decoration-none small fw-semibold text-primary">Sign Up</Link>
                 </div>
             </div>
         </div>

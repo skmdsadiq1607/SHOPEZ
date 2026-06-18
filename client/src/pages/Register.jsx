@@ -1,105 +1,150 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { ShoppingBag } from 'lucide-react';
 
 const Register = () => {
-    const [formData, setFormData] = useState({
-        username: '', email: '', password: '', name: '', mobile: '', address: '', pincode: ''
-    });
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const { register } = useAuth();
     const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [mobile, setMobile] = useState('');
+    const [address, setAddress] = useState('');
+    const [pincode, setPincode] = useState('');
+
+    const [error, setError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
+        if (!username.trim() || !email.trim() || !password.trim() || !name.trim() || !mobile.trim()) {
+            setError('Please fill in all required fields.');
+            return;
+        }
+
+        setSubmitting(true);
+        setError('');
         try {
-            await register(formData);
+            await register({ username, email, password, name, mobile, address, pincode });
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
-        } finally {
-            setIsLoading(false);
+            console.error('Registration error:', err);
+            setError(err.response?.data?.message || 'Failed to register. Username or email may already be taken.');
+            setSubmitting(false);
         }
     };
 
     return (
-        <div className="container py-5 my-md-5">
-            <div className="row g-0 split-bg flex-row-reverse">
-                {/* Image Section */}
-                <div className="col-lg-5 d-none d-lg-block split-img" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80)' }}>
-                    <div className="position-absolute bottom-0 start-0 p-5 z-1 text-white">
-                        <h2 className="display-4 fw-bolder mb-3">Join the<br/>ShopEZ family.</h2>
-                        <p className="lead text-white-50">Sign up today and get exclusive access to new drops.</p>
-                    </div>
+        <div className="container d-flex justify-content-center align-items-center py-5" style={{ minHeight: '80vh' }}>
+            <div className="bg-white p-4 rounded-3 border shadow-sm w-100 animate-fade-in" style={{ maxWidth: '500px' }}>
+                <div className="text-center mb-4">
+                    <ShoppingBag size={48} className="text-primary mb-2" />
+                    <h4 className="fw-bold text-dark font-secondary">Join ShopEZ today</h4>
+                    <p className="text-muted small">Create an account to track orders and save your cart</p>
                 </div>
-                
-                {/* Form Section */}
-                <div className="col-lg-7 d-flex align-items-center justify-content-center p-4 p-md-5 bg-white">
-                    <div className="w-100" style={{ maxWidth: '600px' }}>
-                        <div className="text-center mb-5">
-                            <h2 className="fw-bolder text-primary mb-2">Create an Account</h2>
-                            <p className="text-muted">Start shopping for premium goods today</p>
+
+                {error && <div className="alert alert-danger rounded-2 py-2.5 small">{error}</div>}
+
+                <form onSubmit={handleSubmit}>
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label text-muted small fw-semibold">Name *</label>
+                            <input
+                                type="text"
+                                className="form-control bg-light"
+                                placeholder="Full name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
                         </div>
-                        
-                        {error && <div className="alert alert-danger rounded-3 border-0 bg-danger bg-opacity-10 text-danger mb-4">{error}</div>}
-                        
-                        <form onSubmit={handleSubmit}>
-                            <div className="row g-3 mb-3">
-                                <div className="col-md-6">
-                                    <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider">Username</label>
-                                    <input type="text" className="form-control" name="username" value={formData.username} onChange={handleChange} required placeholder="johndoe123" />
-                                </div>
-                                <div className="col-md-6">
-                                    <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider">Full Name</label>
-                                    <input type="text" className="form-control" name="name" value={formData.name} onChange={handleChange} required placeholder="John Doe" />
-                                </div>
-                            </div>
-                            
-                            <div className="row g-3 mb-3">
-                                <div className="col-md-6">
-                                    <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider">Email Address</label>
-                                    <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required placeholder="name@example.com" />
-                                </div>
-                                <div className="col-md-6">
-                                    <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider">Mobile Number</label>
-                                    <input type="text" className="form-control" name="mobile" value={formData.mobile} onChange={handleChange} required placeholder="1234567890" />
-                                </div>
-                            </div>
-                            
-                            <div className="mb-3">
-                                <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider">Password</label>
-                                <input type="password" className="form-control" name="password" value={formData.password} onChange={handleChange} required placeholder="••••••••" />
-                            </div>
-                            
-                            <div className="mb-3">
-                                <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider">Delivery Address</label>
-                                <textarea className="form-control" name="address" rows="2" value={formData.address} onChange={handleChange} required placeholder="123 Main St..."></textarea>
-                            </div>
-                            
-                            <div className="mb-4">
-                                <label className="form-label text-muted fw-semibold small text-uppercase tracking-wider">Pincode</label>
-                                <input type="text" className="form-control" name="pincode" value={formData.pincode} onChange={handleChange} required placeholder="10001" />
-                            </div>
-                            
-                            <button type="submit" className="btn btn-primary w-100 btn-lg fw-bold rounded-pill shadow-sm mb-4 mt-2" disabled={isLoading}>
-                                {isLoading ? (
-                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                ) : (
-                                    'Create Account'
-                                )}
-                            </button>
-                            
-                            <p className="text-center text-muted">
-                                Already have an account? <Link to="/login" className="text-primary text-decoration-none fw-bold ms-1">Sign in here</Link>
-                            </p>
-                        </form>
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label text-muted small fw-semibold">Username *</label>
+                            <input
+                                type="text"
+                                className="form-control bg-light"
+                                placeholder="Username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
                     </div>
+
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label text-muted small fw-semibold">Email Address *</label>
+                            <input
+                                type="email"
+                                className="form-control bg-light"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label text-muted small fw-semibold">Mobile *</label>
+                            <input
+                                type="tel"
+                                className="form-control bg-light"
+                                placeholder="10-digit mobile"
+                                value={mobile}
+                                onChange={(e) => setMobile(e.target.value)}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label text-muted small fw-semibold">Password *</label>
+                        <input
+                            type="password"
+                            className="form-control bg-light"
+                            placeholder="Min 6 characters"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label text-muted small fw-semibold">Address</label>
+                        <input
+                            type="text"
+                            className="form-control bg-light"
+                            placeholder="Full address (optional)"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="form-label text-muted small fw-semibold">Pincode</label>
+                        <input
+                            type="text"
+                            className="form-control bg-light"
+                            placeholder="Pincode (optional)"
+                            value={pincode}
+                            onChange={(e) => setPincode(e.target.value)}
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="btn btn-primary w-100 py-2.5 rounded-pill fw-semibold shadow-sm mb-3"
+                        disabled={submitting}
+                    >
+                        {submitting ? 'Creating account...' : 'Create Account'}
+                    </button>
+                </form>
+
+                <div className="text-center">
+                    <span className="text-muted small">Already have an account? </span>
+                    <Link to="/login" className="text-decoration-none small fw-semibold text-primary">Login</Link>
                 </div>
             </div>
         </div>

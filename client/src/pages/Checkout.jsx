@@ -1,32 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { CheckCircle, CreditCard } from 'lucide-react';
 
 const Checkout = () => {
-    const { api, user } = useAuth();
+    const { api, user, fetchCartCount } = useAuth();
     const navigate = useNavigate();
+    
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [address, setAddress] = useState(user?.address || '');
+    const [mobile, setMobile] = useState(user?.mobile || '');
+    const [cardNumber, setCardNumber] = useState('');
+    const [cardExpiry, setCardExpiry] = useState('');
+    const [cardCvv, setCardCvv] = useState('');
     
-    const [formData, setFormData] = useState({
-        name: user?.name || '',
-        email: user?.email || '',
-        mobile: user?.mobile || '',
-        address: user?.address || '',
-        pincode: user?.pincode || '',
-        paymentMethod: 'Credit Card'
-    });
+    const [submitting, setSubmitting] = useState(false);
+    const [orderConfirmed, setOrderConfirmed] = useState(false);
+    const [error, setError] = useState('');
 
     useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        
         const fetchCart = async () => {
             try {
                 const res = await api.get('/api/cart');
+                setCartItems(res.data);
                 if (res.data.length === 0) {
                     navigate('/cart');
-                    return;
                 }
-                setCartItems(res.data);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -34,128 +39,224 @@ const Checkout = () => {
             }
         };
         fetchCart();
-    }, [api, navigate]);
+    }, [user, api, navigate]);
 
-    const calculateTotal = () => {
-        return cartItems.reduce((total, item) => {
-            const discountedPrice = item.price - (item.price * (item.discount / 100));
-            return total + (discountedPrice * item.quantity);
-        }, 0);
-    };
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e) => {
+    const handleCheckoutSubmit = async (e) => {
         e.preventDefault();
+        if (!address.trim() || !mobile.trim()) {
+            setError('Please fill out shipping address and mobile number.');
+            return;
+        }
+
+        setSubmitting(true);
+        setError('');
+
+        const orderItems = cartItems.map(item => ({
+            productId: item.productId,
+            title: item.title,
+            quantity: item.quantity,
+            size: item.size,
+            price: item.price - (item.price * (item.discount / 100)),
+            mainImg: item.mainImg
+        }));
+
+        const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        const totalDiscount = cartItems.reduce((acc, item) => acc + ((item.price * (item.discount / 100)) * item.quantity), 0);
+        const finalTotal = subtotal - totalDiscount;
+
         try {
-            const orderData = {
-                ...formData,
-                products: cartItems.map(item => ({
-                    productId: item.productId,
-                    title: item.title,
-                    desc: item.description,
-                    image: item.mainImg,
-                    size: item.size,
-                    quantity: item.quantity,
-                    price: item.price,
-                    discount: item.discount
-                })),
-                totalAmount: calculateTotal()
-            };
-            
-            await api.post('/api/orders', orderData);
-            navigate('/profile', { state: { message: 'Order placed successfully!' } });
+            await api.post('/api/orders', {
+                items: orderItems,
+                totalAmount: finalTotal,
+                shippingAddress: address,
+                mobile: mobile,
+                paymentMethod: 'Card'
+            });
+            await fetchCartCount();
+            setOrderConfirmed(true);
+            setTimeout(() => {
+                navigate('/');
+            }, 3000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to place order');
+            console.error('Order creation failed:', err);
+            setError(err.response?.data?.message || 'Failed to place order. Try again.');
+            setSubmitting(false);
         }
     };
 
-    if (loading) return <div className="text-center mt-5"><div className="spinner-border text-primary" role="status"></div></div>;
+    if (loading) return (
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+            <div className="spinner-border text-primary" role="status"></div>
+        </div>
+    );
+
+    const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const totalDiscount = cartItems.reduce((acc, item) => acc + ((item.price * (item.discount / 100)) * item.quantity), 0);
+    const finalTotal = subtotal - totalDiscount;
+
+    if (orderConfirmed) {
+        return (
+            <div className="container mt-5 text-center animate-fade-in">
+                <div className="bg-white p-5 rounded-3 border shadow-sm">
+                    <CheckCircle size={72} className="text-success mb-4 animate-bounce" />
+                    <h3 className="fw-bold text-dark font-secondary">Order Confirmed!</h3>
+                    <p className="text-muted small my-3">Thank you for shopping with ShopEZ. Your order has been placed successfully.</p>
+                    <p className="text-muted small">Redirecting to Home page...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="container mt-4 mb-5">
-            <h2 className="fw-bolder mb-4">Checkout</h2>
-            {error && <div className="alert alert-danger">{error}</div>}
+        <div className="container mt-4 animate-fade-in">
+            <h3 className="fw-bold text-dark font-secondary mb-4">Secure Checkout</h3>
             
-            <div className="row g-4">
-                <div className="col-lg-8">
-                    <div className="card shadow-sm border-0 rounded-4 mb-4">
-                        <div className="card-body p-4">
-                            <h4 className="fw-bold mb-4 border-bottom pb-2">Shipping Details</h4>
-                            <form onSubmit={handleSubmit} id="checkout-form">
-                                <div className="row g-3 mb-3">
-                                    <div className="col-md-6">
-                                        <label className="form-label text-muted fw-semibold">Full Name</label>
-                                        <input type="text" className="form-control form-control-lg bg-light border-0" name="name" value={formData.name} onChange={handleChange} required />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label text-muted fw-semibold">Email</label>
-                                        <input type="email" className="form-control form-control-lg bg-light border-0" name="email" value={formData.email} onChange={handleChange} required />
-                                    </div>
+            {error && <div className="alert alert-danger rounded-2 py-2.5 small">{error}</div>}
+
+            <form onSubmit={handleCheckoutSubmit}>
+                <div className="row g-4">
+                    {/* Form Section */}
+                    <div className="col-lg-7">
+                        <div className="bg-white p-4 rounded-3 border d-flex flex-column gap-3 mb-3">
+                            <h5 className="fw-bold text-dark font-secondary border-bottom pb-2 mb-2">Shipping Information</h5>
+                            
+                            <div>
+                                <label className="form-label text-muted small fw-semibold">Delivery Address</label>
+                                <textarea
+                                    className="form-control bg-light"
+                                    rows="3"
+                                    placeholder="Enter your full street address, landmark, city and pincode"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label className="form-label text-muted small fw-semibold">Mobile Number</label>
+                                <input
+                                    type="tel"
+                                    className="form-control bg-light"
+                                    placeholder="Enter 10-digit mobile number"
+                                    value={mobile}
+                                    onChange={(e) => setMobile(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-3 border d-flex flex-column gap-3">
+                            <h5 className="fw-bold text-dark font-secondary border-bottom pb-2 mb-2 d-flex align-items-center gap-2">
+                                <CreditCard size={18} /> Payment Details
+                            </h5>
+                            
+                            <div>
+                                <label className="form-label text-muted small fw-semibold">Card Holder Name</label>
+                                <input
+                                    type="text"
+                                    className="form-control bg-light"
+                                    placeholder="Enter cardholder name"
+                                    defaultValue={user?.name}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="form-label text-muted small fw-semibold">Card Number</label>
+                                <input
+                                    type="text"
+                                    className="form-control bg-light"
+                                    placeholder="XXXX XXXX XXXX XXXX"
+                                    maxLength="16"
+                                    value={cardNumber}
+                                    onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, ''))}
+                                    required
+                                />
+                            </div>
+
+                            <div className="row">
+                                <div className="col-6">
+                                    <label className="form-label text-muted small fw-semibold">Expiry Date</label>
+                                    <input
+                                        type="text"
+                                        className="form-control bg-light"
+                                        placeholder="MM/YY"
+                                        maxLength="5"
+                                        value={cardExpiry}
+                                        onChange={(e) => setCardExpiry(e.target.value)}
+                                        required
+                                    />
                                 </div>
-                                <div className="row g-3 mb-3">
-                                    <div className="col-md-6">
-                                        <label className="form-label text-muted fw-semibold">Mobile Number</label>
-                                        <input type="text" className="form-control form-control-lg bg-light border-0" name="mobile" value={formData.mobile} onChange={handleChange} required />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label text-muted fw-semibold">Pincode</label>
-                                        <input type="text" className="form-control form-control-lg bg-light border-0" name="pincode" value={formData.pincode} onChange={handleChange} required />
-                                    </div>
+                                <div className="col-6">
+                                    <label className="form-label text-muted small fw-semibold">CVV</label>
+                                    <input
+                                        type="password"
+                                        className="form-control bg-light"
+                                        placeholder="XXX"
+                                        maxLength="3"
+                                        value={cardCvv}
+                                        onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
+                                        required
+                                    />
                                 </div>
-                                <div className="mb-4">
-                                    <label className="form-label text-muted fw-semibold">Delivery Address</label>
-                                    <textarea className="form-control form-control-lg bg-light border-0" name="address" rows="3" value={formData.address} onChange={handleChange} required></textarea>
-                                </div>
-                                
-                                <h4 className="fw-bold mb-3 mt-4 border-bottom pb-2">Payment Method</h4>
-                                <div className="mb-3">
-                                    <select className="form-select form-select-lg bg-light border-0" name="paymentMethod" value={formData.paymentMethod} onChange={handleChange}>
-                                        <option value="Credit Card">Credit/Debit Card</option>
-                                        <option value="PayPal">PayPal</option>
-                                        <option value="Cash on Delivery">Cash on Delivery</option>
-                                    </select>
-                                </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div className="col-lg-4">
-                    <div className="card shadow-sm border-0 rounded-4 sticky-top" style={{ top: '20px' }}>
-                        <div className="card-body p-4">
-                            <h4 className="fw-bold mb-4">Order Summary</h4>
-                            <div className="mb-4" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                {cartItems.map((item, index) => (
-                                    <div key={index} className="d-flex mb-3 border-bottom pb-2">
-                                        <img src={item.mainImg} alt={item.title} style={{ width: '50px', height: '50px', objectFit: 'cover' }} className="rounded me-3" />
-                                        <div className="flex-grow-1">
-                                            <h6 className="mb-0 text-truncate" style={{ maxWidth: '150px' }}>{item.title}</h6>
-                                            <small className="text-muted">Qty: {item.quantity}</small>
+
+                    {/* Bill Section */}
+                    <div className="col-lg-5">
+                        <div className="bg-white p-4 rounded-3 border">
+                            <h5 className="fw-bold text-dark font-secondary border-bottom pb-2 mb-3">Order Summary</h5>
+                            
+                            <div className="d-flex flex-column gap-3 mb-4 overflow-y-auto" style={{ maxHeight: '200px' }}>
+                                {cartItems.map(item => {
+                                    const discPrice = item.price - (item.price * (item.discount / 100));
+                                    return (
+                                        <div key={item._id} className="d-flex justify-content-between align-items-center gap-3">
+                                            <div className="d-flex align-items-center gap-2">
+                                                <img src={item.mainImg} className="rounded object-fit-cover border" style={{ width: '45px', height: '45px' }} alt="" />
+                                                <div>
+                                                    <span className="fw-semibold text-dark small d-block text-truncate" style={{ maxWidth: '180px' }}>{item.title}</span>
+                                                    <span className="text-muted small">Qty: {item.quantity} | Size: {item.size}</span>
+                                                </div>
+                                            </div>
+                                            <span className="fw-bold text-dark small">${(discPrice * item.quantity).toFixed(2)}</span>
                                         </div>
-                                        <div className="text-end">
-                                            <span className="fw-bold">${((item.price - (item.price * (item.discount / 100))) * item.quantity).toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
-                            <div className="d-flex justify-content-between mb-3 border-bottom pb-3">
-                                <span className="text-muted">Subtotal</span>
-                                <span className="fw-bold">${calculateTotal().toFixed(2)}</span>
+
+                            <div className="d-flex justify-content-between mb-3 text-muted small">
+                                <span>Cart Subtotal</span>
+                                <span>${subtotal.toFixed(2)}</span>
                             </div>
-                            <div className="d-flex justify-content-between mb-4 mt-2">
-                                <span className="fw-bolder fs-5">Total to Pay</span>
-                                <span className="fw-bolder fs-5 text-primary">${calculateTotal().toFixed(2)}</span>
+                            <div className="d-flex justify-content-between mb-3 text-success small">
+                                <span>Cart Discount</span>
+                                <span>-${totalDiscount.toFixed(2)}</span>
                             </div>
-                            <button form="checkout-form" type="submit" className="btn btn-primary w-100 btn-lg fw-bold rounded-3 shadow-sm">
-                                Place Order
+                            <div className="d-flex justify-content-between mb-3 text-muted small">
+                                <span>Delivery Fee</span>
+                                <span className="text-success fw-semibold">FREE</span>
+                            </div>
+
+                            <hr className="my-3 text-muted" />
+
+                            <div className="d-flex justify-content-between mb-4">
+                                <span className="fw-bold text-dark">Order Total</span>
+                                <span className="fw-bold text-dark fs-5">${finalTotal.toFixed(2)}</span>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="btn btn-primary btn-lg w-100 py-2.5 d-flex align-items-center justify-content-center gap-2 shadow-sm fw-bold"
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Processing Payment...' : `Pay & Place Order $${finalTotal.toFixed(2)}`}
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     );
 };

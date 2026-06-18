@@ -1,10 +1,14 @@
 const Product = require('../models/Product');
 
 exports.getAllProducts = async (req, res) => {
+  console.log('GET /api/products request received');
   try {
+    console.log('Querying Product.find()...');
     const products = await Product.find();
+    console.log('Query success! Product count:', products.length);
     res.json(products);
   } catch (err) {
+    console.error('Query error:', err);
     res.status(500).json({ message: err.message });
   }
 };
