@@ -13,7 +13,11 @@ app.use(express.json());
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected to ShopEZ E-Commerce Database'))
+  .then(() => {
+    console.log('MongoDB Connected to ShopEZ E-Commerce Database');
+    // Run auto-seeder to ensure products and admin are populated in production DB
+    require('./config/dbSeeder')();
+  })
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
